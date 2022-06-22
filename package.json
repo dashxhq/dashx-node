@@ -1,0 +1,36 @@
+{
+  "name": "@dashx/node",
+  "title": "dashx-node",
+  "version": "0.1.29",
+  "description": "DashX SDK for Node",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdx build --tsconfig tsconfig.json",
+    "start": "tsdx watch --tsconfig tsconfig.json --verbose --noClean"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dashxhq/dashx-js",
+    "baseUrl": "https://github.com/dashxhq/dashx-js"
+  },
+  "keywords": [
+    "dashx"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "got": "^11.5.2",
+    "uuid-random": "^1.3.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.29.0",
+    "@typescript-eslint/parser": "^5.29.0",
+    "eslint": "^8.18.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "tsdx": "^0.14.1",
+    "typescript": "^4.7.4"
+  }
+}
