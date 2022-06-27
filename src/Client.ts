@@ -15,13 +15,13 @@ type GenerateIdentityTokenOptions = {
 }
 
 type FetchCartParams = {
-  uid?: string,
+  uid?: string | number,
   anonymousUid?: string,
   orderId?: string
 }
 
 type CheckoutCartParams = {
-  uid: string,
+  uid: string | number,
   anonymousUid?: string,
   gateway?: string,
   gatewayOptions?: Record<string, any>,
@@ -29,7 +29,7 @@ type CheckoutCartParams = {
 }
 
 type CapturePaymentParams = {
-  uid: string,
+  uid: string | number,
   anonymousUid?: string,
   gatewayResponse: Record<string, any>,
   orderId?: string
@@ -71,7 +71,6 @@ class Client {
         'User-Agent': 'dashx-node',
         'X-Public-Key': this.publicKey,
         'X-Private-Key': this.privateKey,
-        'X-Target-Installation': this.targetInstallation,
         'X-Target-Environment': this.targetEnvironment,
         'Content-Type': 'application/json'
       },
@@ -114,15 +113,15 @@ class Client {
     return response?.createDelivery
   }
 
-  identify(uid: string, options?: IdentifyParams): Promise<Response>
+  identify(uid: string | number, options?: IdentifyParams): Promise<Response>
   identify(options?: IdentifyParams): Promise<Response>
   identify(
-    uid: string | IdentifyParams = {}, options: IdentifyParams = {} as IdentifyParams
+    uid: string | number | IdentifyParams = {}, options: IdentifyParams = {} as IdentifyParams
   ): Promise<Response> {
     let params
 
-    if (typeof uid === 'string') {
-      params = { uid, ...options }
+    if (typeof uid === 'string' || typeof uid === 'number') {
+      params = { uid: String(uid), ...options }
     } else {
       const identifyOptions = uid
 
@@ -135,7 +134,7 @@ class Client {
     return this.makeHttpRequest(identifyAccountRequest, params)
   }
 
-  generateIdentityToken(uid: string, options?: GenerateIdentityTokenOptions): string {
+  generateIdentityToken(uid: string | number, options?: GenerateIdentityTokenOptions): string {
     if (!this.privateKey) {
       throw new Error('Private key not set')
     }
@@ -153,8 +152,8 @@ class Client {
     return encryptedToken.toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
   }
 
-  track(event: string, accountUid: string, data: Record<string, any>): Promise<Response> {
-    return this.makeHttpRequest(trackEventRequest, { event, accountUid, data })
+  track(event: string, accountUid: string | number, data: Record<string, any>): Promise<Response> {
+    return this.makeHttpRequest(trackEventRequest, { event, accountUid: String(accountUid), data })
   }
 
   addContent(urn: string, data: Record<string, any>): Promise<Response> {
@@ -236,7 +235,7 @@ class Client {
 
   async fetchCart({ uid, anonymousUid, orderId }: FetchCartParams): Promise<any> {
     const params = {
-      accountUid: uid,
+      accountUid: String(uid),
       accountAnonymousUid: anonymousUid,
       orderId
     }
@@ -249,7 +248,7 @@ class Client {
     uid, anonymousUid, gateway, gatewayOptions, orderId
   }: CheckoutCartParams): Promise<any> {
     const params = {
-      accountUid: uid,
+      accountUid: String(uid),
       accountAnonymousUid: anonymousUid,
       gatewayIdentifier: gateway,
       gatewayOptions,
@@ -264,7 +263,7 @@ class Client {
     uid, anonymousUid, gatewayResponse, orderId
   }: CapturePaymentParams): Promise<any> {
     const params = {
-      accountUid: uid,
+      accountUid: String(uid),
       accountAnonymousUid: anonymousUid,
       gatewayResponse,
       orderId
