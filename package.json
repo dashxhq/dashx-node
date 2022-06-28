@@ -1,7 +1,7 @@
 {
   "name": "@dashx/node",
   "title": "dashx-node",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "description": "DashX SDK for Node",
   "main": "dist/index.js",
   "files": [
@@ -13,8 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dashxhq/dashx-js",
-    "baseUrl": "https://github.com/dashxhq/dashx-js"
+    "url": "git+https://github.com/dashxhq/dashx-node"
   },
   "keywords": [
     "dashx"
