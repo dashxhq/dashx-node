@@ -46,13 +46,31 @@ class Client {
 
   baseUri: string
 
+  queue: any[]
+
+  flushAt: number
+
+  flushInterval: number
+
+  enableQueue: boolean
+  
+  timer: number | null | NodeJS.Timeout 
+
   constructor({
     baseUri = process.env.DASHX_BASE_URI || 'https://api.dashx.com/graphql',
     publicKey = process.env.DASHX_PUBLIC_KEY,
     privateKey = process.env.DASHX_PRIVATE_KEY,
     targetInstallation = process.env.DASHX_TARGET_INSTALLATION,
-    targetEnvironment = process.env.DASHX_TARGET_ENVIRONMENT
+    targetEnvironment = process.env.DASHX_TARGET_ENVIRONMENT,
+    flushAt = 5,
+    flushInterval = 10000,
+    enableQueue = true,
   } = {}) {
+    this.queue = []
+    this.flushAt = flushAt
+    this.flushInterval = flushInterval
+    this.enableQueue = enableQueue
+    this.timer = null
     this.baseUri = baseUri
     this.publicKey = publicKey
     this.privateKey = privateKey
@@ -83,6 +101,42 @@ class Client {
     }
 
     return Promise.reject(response.errors)
+  }
+
+  enqueue(callback: any) {
+    if (!this.enableQueue) {
+      return setImmediate(callback)
+    }
+
+    console.log('enqueue: ', this.queue.length)
+    this.queue.push(callback)
+    const hasReachedFlushAT = this.queue.length >= this.flushAt
+    if (hasReachedFlushAT) {
+      console.log('queue full and flushing', this.queue)
+      this.flush()
+      return
+    }
+
+    if (this.flushInterval && !this.timer) {
+      this.timer = setTimeout(this.flush.bind(this), this.flushInterval)
+      console.log('flush interval expired', this.queue)
+    }
+  }
+
+  flush() {
+    if (this.timer) {
+      clearTimeout(this.timer)
+      this.timer = null
+    }
+
+    const callbacks = this.queue.splice(0, this.flushAt)
+    console.log('executing queues')
+    setImmediate(() => {
+      callbacks.forEach((callback, index) => {
+        console.log('executing:', index)
+        callback()
+      })
+    })
   }
 
   async deliver(urn: string, options?: Record<string, any>): Promise<any> {
@@ -152,8 +206,10 @@ class Client {
     return encryptedToken.toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
   }
 
-  track(event: string, accountUid: string | number, data: Record<string, any>): Promise<Response> {
-    return this.makeHttpRequest(trackEventRequest, { event, accountUid: String(accountUid), data })
+  track(event: string, accountUid: string | number, data: Record<string, any>) {
+    console.log(accountUid, 'inside sdk')
+    // return this.makeHttpRequest(trackEventRequest, { event, accountUid: String(accountUid), data })
+    this.enqueue(() => this.makeHttpRequest(trackEventRequest, { event, accountUid: String(accountUid), data, timestamp: new Date() })) 
   }
 
   addContent(urn: string, data: Record<string, any>): Promise<Response> {
