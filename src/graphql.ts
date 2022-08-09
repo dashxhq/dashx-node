@@ -58,7 +58,6 @@ export const createDeliveryRequest = `
 
 const item = `
   id
-  installationId
   name
   identifier
   description
