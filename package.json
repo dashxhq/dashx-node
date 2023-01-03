@@ -1,7 +1,7 @@
 {
   "name": "@dashx/node",
   "title": "dashx-node",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "description": "DashX SDK for Node",
   "main": "dist/index.js",
   "files": [
