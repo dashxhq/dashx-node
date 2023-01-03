@@ -10,10 +10,6 @@ import type { ContentOptions, FetchContentOptions } from './ContentOptionsBuilde
 
 type IdentifyParams = Record<string, any>
 
-type GenerateIdentityTokenOptions = {
-  kind?: string
-}
-
 type FetchCartParams = {
   uid?: string | number,
   anonymousUid?: string,
@@ -132,24 +128,6 @@ class Client {
     }
 
     return this.makeHttpRequest(identifyAccountRequest, params)
-  }
-
-  generateIdentityToken(uid: string | number, options?: GenerateIdentityTokenOptions): string {
-    if (!this.privateKey) {
-      throw new Error('Private key not set')
-    }
-
-    const kind = options?.kind || 'regular'
-    const nonce = crypto.randomBytes(12)
-    const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(this.privateKey), nonce, {
-      authTagLength: 16
-    })
-
-    const encrypted = Buffer.concat([ cipher.update(`v1;${kind};${uid}`), cipher.final() ])
-    const encryptedToken = Buffer.concat([ nonce, encrypted, cipher.getAuthTag() ])
-
-    // Base64.urlsafe_encode64
-    return encryptedToken.toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
   }
 
   track(event: string, accountUid: string | number, data: Record<string, any>): Promise<Response> {
