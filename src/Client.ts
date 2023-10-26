@@ -4,7 +4,7 @@ import uuid from 'uuid-random'
 import type { Response } from 'got'
 
 import ContentOptionsBuilder from './ContentOptionsBuilder'
-import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest } from './graphql'
+import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest } from './graphql'
 import { parseFilterObject } from './utils'
 import type { ContentOptions, FetchContentOptions } from './ContentOptionsBuilder'
 
@@ -29,6 +29,14 @@ type CapturePaymentParams = {
   anonymousUid?: string,
   gatewayResponse: Record<string, any>,
   orderId?: string
+}
+
+type PrepareAssetParams = {
+  resource: string,
+  attribute: string,
+  name: string,
+  size: number,
+  mimeType: string
 }
 
 class Client {
@@ -249,6 +257,31 @@ class Client {
 
     const response = await this.makeHttpRequest(capturePaymentRequest, params)
     return response?.capturePayment
+  }
+
+  async asset(uid: string): Promise<any> {
+    const params = {
+      uid
+    }
+
+    const response = await this.makeHttpRequest(assetRequest, params)
+    return response?.asset
+  }
+
+  async prepareAsset(input: PrepareAssetParams): Promise<any> {
+    let params
+
+    if (this.targetEnvironment) {
+      params = {
+        ...input,
+        targetEnvironment: this.targetEnvironment
+      }
+    } else {
+      params = input
+    }
+
+    const response = await this.makeHttpRequest(prepareAssetRequest, params)
+    return response?.prepareAsset
   }
 }
 
