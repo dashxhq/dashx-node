@@ -149,3 +149,19 @@ export const capturePaymentRequest = `
     }
   }
 `
+
+export const fetchStoredPreferencesRequest = `
+  query FetchStoredPreferences($input: FetchStoredPreferencesInput) {
+    fetchStoredPreferences(input: $input) {
+      preferenceData
+    }
+  }
+`
+
+export const saveStoredPreferencesRequest = `
+  mutation SaveStoredPreferences($input: SaveStoredPreferencesInput) {
+    saveStoredPreferences(input: $input) {
+      success
+    }
+  }
+`
