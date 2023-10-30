@@ -268,9 +268,9 @@ class Client {
     return response?.capturePayment
   }
 
-  async asset(uid: string): Promise<any> {
+  async asset(id: string): Promise<any> {
     const params = {
-      uid
+      id
     }
 
     const response = await this.makeHttpRequest(assetRequest, params)
