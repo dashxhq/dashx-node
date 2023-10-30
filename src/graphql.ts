@@ -150,6 +150,7 @@ export const capturePaymentRequest = `
   }
 `
 
+<<<<<<< HEAD
 const asset = `
   id
   workspaceId
@@ -172,10 +173,17 @@ export const assetRequest = `
   query Asset($id: UUID!) {
     asset(id: $id) {
       ${asset}
+=======
+export const fetchStoredPreferencesRequest = `
+  query FetchStoredPreferences($input: FetchStoredPreferencesInput) {
+    fetchStoredPreferences(input: $input) {
+      preferenceData
+>>>>>>> main
     }
   }
 `
 
+<<<<<<< HEAD
 export const prepareAssetRequest = `
   mutation PrepareAsset($input: PrepareAssetInput!) {
     prepareAsset(input: $input) {
@@ -183,3 +191,12 @@ export const prepareAssetRequest = `
     }
   }
 `
+=======
+export const saveStoredPreferencesRequest = `
+  mutation SaveStoredPreferences($input: SaveStoredPreferencesInput) {
+    saveStoredPreferences(input: $input) {
+      success
+    }
+  }
+`
+>>>>>>> main
