@@ -150,10 +150,44 @@ export const capturePaymentRequest = `
   }
 `
 
+const asset = `
+  id
+  workspaceId
+  resourceId
+  attributeId
+  storageProviderId
+  uploaderId
+  data
+  uploadStatus
+  processingStatus
+  createdAt
+  updatedAt
+  url
+  name
+  size
+  mimeType
+`;
+
+export const assetRequest = `
+  query Asset($id: UUID!) {
+    asset(id: $id) {
+      ${asset}
+    }
+  }
+`
+
 export const fetchStoredPreferencesRequest = `
   query FetchStoredPreferences($input: FetchStoredPreferencesInput) {
     fetchStoredPreferences(input: $input) {
       preferenceData
+    }
+  }
+`
+
+export const prepareAssetRequest = `
+  mutation PrepareAsset($input: PrepareAssetInput!) {
+    prepareAsset(input: $input) {
+      ${asset}
     }
   }
 `

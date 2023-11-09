@@ -4,7 +4,7 @@ import uuid from 'uuid-random'
 import type { Response } from 'got'
 
 import ContentOptionsBuilder from './ContentOptionsBuilder'
-import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest } from './graphql'
+import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest } from './graphql'
 import { parseFilterObject } from './utils'
 import type { ContentOptions, FetchContentOptions } from './ContentOptionsBuilder'
 
@@ -29,6 +29,14 @@ type CapturePaymentParams = {
   anonymousUid?: string,
   gatewayResponse: Record<string, any>,
   orderId?: string
+}
+
+type PrepareAssetParams = {
+  resource: string,
+  attribute: string,
+  name: string,
+  size: number,
+  mimeType: string
 }
 
 type FetchStoredPreferencesParams = {
@@ -69,7 +77,7 @@ class Client {
     const response: any = await http(this.baseUri, {
       body: JSON.stringify({
         query: request,
-        variables: { input: params }
+        variables: params
       }),
       method: 'POST',
       headers: {
@@ -113,7 +121,7 @@ class Client {
       params.content.bcc = content.bcc ? [ content.bcc ].flat() : [ bcc ].flat()
     }
 
-    const response = await this.makeHttpRequest(createDeliveryRequest, params)
+    const response = await this.makeHttpRequest(createDeliveryRequest, { input: params })
 
     return response?.createDelivery
   }
@@ -136,7 +144,7 @@ class Client {
       }
     }
 
-    return this.makeHttpRequest(identifyAccountRequest, params)
+    return this.makeHttpRequest(identifyAccountRequest, { input: params })
   }
 
   track(event: string, accountUid: string | number, data: Record<string, any>): Promise<Response> {
@@ -155,7 +163,7 @@ class Client {
 
     const params = { content, contentType, data }
 
-    return this.makeHttpRequest(addContentRequest, params)
+    return this.makeHttpRequest(addContentRequest, { input: params })
   }
 
   editContent(urn: string, data: Record<string, any>): Promise<Response> {
@@ -170,7 +178,7 @@ class Client {
 
     const params = { content, contentType, data }
 
-    return this.makeHttpRequest(editContentRequest, params)
+    return this.makeHttpRequest(editContentRequest, { input: params })
   }
 
   searchContent(contentType: string): ContentOptionsBuilder
@@ -191,7 +199,7 @@ class Client {
 
     const result = this.makeHttpRequest(
       searchContentRequest,
-      { ...options, contentType, filter }
+      { input: { ...options, contentType, filter } }
     ).then((response) => response?.searchContent)
 
     if (options.returnType === 'all') {
@@ -209,14 +217,14 @@ class Client {
     const [ contentType, content ] = urn.split('/')
     const params = { content, contentType, ...options }
 
-    const response = await this.makeHttpRequest(fetchContentRequest, params)
+    const response = await this.makeHttpRequest(fetchContentRequest, {input: params})
     return response?.fetchContent
   }
 
   async fetchItem(identifier: string): Promise<any> {
     const params = { identifier }
 
-    const response = await this.makeHttpRequest(fetchItemRequest, params)
+    const response = await this.makeHttpRequest(fetchItemRequest, {input: params})
     return response?.fetchItem
   }
 
@@ -227,7 +235,7 @@ class Client {
       orderId
     }
 
-    const response = await this.makeHttpRequest(fetchCartRequest, params)
+    const response = await this.makeHttpRequest(fetchCartRequest, {input: params})
     return response?.fetchCart
   }
 
@@ -242,7 +250,7 @@ class Client {
       orderId
     }
 
-    const response = await this.makeHttpRequest(checkoutCartRequest, params)
+    const response = await this.makeHttpRequest(checkoutCartRequest, {input: params})
     return response?.checkoutCart
   }
 
@@ -256,21 +264,46 @@ class Client {
       orderId
     }
 
-    const response = await this.makeHttpRequest(capturePaymentRequest, params)
+    const response = await this.makeHttpRequest(capturePaymentRequest, {input: params})
     return response?.capturePayment
+  }
+
+  async asset(id: string): Promise<any> {
+    const params = {
+      id
+    }
+
+    const response = await this.makeHttpRequest(assetRequest, params)
+    return response?.asset
+  }
+
+  async prepareAsset(input: PrepareAssetParams): Promise<any> {
+    let params
+
+    if (this.targetEnvironment) {
+      params = {
+        ...input,
+        targetEnvironment: this.targetEnvironment
+      }
+    } else {
+      params = input
+    }
+
+    const response = await this.makeHttpRequest(prepareAssetRequest, {input: params})
+    return response?.prepareAsset
   }
 
   async fetchStoredPreferences({ uid }: FetchStoredPreferencesParams): Promise<any> {
     const params = { accountUid: String(uid) }
 
-    const response = await this.makeHttpRequest(fetchStoredPreferencesRequest, params)
+    const response = await this.makeHttpRequest(fetchStoredPreferencesRequest, {input: params})
     return response?.preferenceData
   }
 
   async saveStoredPreferences({ uid, preferenceData }: SaveStoredPreferencesParams): Promise<any> {
     const params = { accountUid: String(uid), preferenceData }
 
-    const response = await this.makeHttpRequest(saveStoredPreferencesRequest, params)
+    const response = await this.makeHttpRequest(saveStoredPreferencesRequest, {input: params})
     return response?.preferenceData
   }
 }
