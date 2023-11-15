@@ -4,7 +4,7 @@ import uuid from 'uuid-random'
 import type { Response } from 'got'
 
 import ContentOptionsBuilder from './ContentOptionsBuilder'
-import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest } from './graphql'
+import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest } from './graphql'
 import { parseFilterObject } from './utils'
 import type { ContentOptions, FetchContentOptions } from './ContentOptionsBuilder'
 
@@ -37,6 +37,13 @@ type PrepareAssetParams = {
   name: string,
   size: number,
   mimeType: string
+}
+
+type AssetsListParams = {
+  filter?: JSON,
+  limit?: number,
+  order?: JSON,
+  page?: number
 }
 
 type FetchStoredPreferencesParams = {
@@ -291,6 +298,11 @@ class Client {
 
     const response = await this.makeHttpRequest(prepareAssetRequest, {input: params})
     return response?.prepareAsset
+  }
+
+  async assetsList(input?: AssetsListParams): Promise<any> {
+    const response = await this.makeHttpRequest(assetsListRequest, input)
+    return response?.assetsList
   }
 
   async fetchStoredPreferences({ uid }: FetchStoredPreferencesParams): Promise<any> {
