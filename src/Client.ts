@@ -103,7 +103,7 @@ class Client {
     const { content = {}, to, cc, bcc, ...rest } = options || {}
 
     const params = {
-      templateSubkind,
+      templateSubkind: templateSubkind.toUpperCase(),
       templateIdentifier,
       content,
       ...rest
