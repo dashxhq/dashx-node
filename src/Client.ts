@@ -99,12 +99,12 @@ class Client {
   }
 
   async deliver(urn: string, options?: Record<string, any>): Promise<any> {
-    const [ contentTypeIdentifier, contentIdentifier ] = urn.split('/')
+    const [ templateSubkind, templateIdentifier ] = urn.split('/')
     const { content = {}, to, cc, bcc, ...rest } = options || {}
 
     const params = {
-      contentTypeIdentifier,
-      contentIdentifier,
+      templateSubkind,
+      templateIdentifier,
       content,
       ...rest
     }
