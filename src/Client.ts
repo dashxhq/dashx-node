@@ -301,7 +301,7 @@ class Client {
   }
 
   async assetsList(input?: AssetsListParams): Promise<any> {
-    const response = await this.makeHttpRequest(assetsListRequest, input)
+    const response = await this.makeHttpRequest(assetsListRequest, input ?? {})
     return response?.assetsList
   }
 
