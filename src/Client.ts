@@ -275,7 +275,7 @@ class Client {
     return response?.capturePayment
   }
 
-  async asset(id: string): Promise<any> {
+  async getAsset(id: string): Promise<any> {
     const params = {
       id
     }
