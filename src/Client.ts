@@ -300,7 +300,7 @@ class Client {
     return response?.prepareAsset
   }
 
-  async assetsList(input?: AssetsListParams): Promise<any> {
+  async listAssets(input?: AssetsListParams): Promise<any> {
     const response = await this.makeHttpRequest(assetsListRequest, input ?? {})
     return response?.assetsList
   }
