@@ -155,7 +155,7 @@ class Client {
   }
 
   track(event: string, accountUid: string | number, data: Record<string, any>): Promise<Response> {
-    return this.makeHttpRequest(trackEventRequest, { event, accountUid: String(accountUid), data })
+    return this.makeHttpRequest(trackEventRequest, { input: { event, accountUid: String(accountUid), data } })
   }
 
   addContent(urn: string, data: Record<string, any>): Promise<Response> {
@@ -275,7 +275,7 @@ class Client {
     return response?.capturePayment
   }
 
-  async asset(id: string): Promise<any> {
+  async getAsset(id: string): Promise<any> {
     const params = {
       id
     }
