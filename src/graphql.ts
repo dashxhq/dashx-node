@@ -80,6 +80,26 @@ const item = `
   }
 `
 
+export const fetchContactsRequest = `
+  query FetchContacts($input: FetchContactsInput!) {
+    fetchContacts(input: $input) {
+      contacts {
+        id
+        accountId
+        name
+        kind
+        value
+        unverifiedValue
+        verifiedAt
+        status
+        tag
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`
+
 export const fetchItemRequest = `
   query FetchItem($input: FetchItemInput) {
     fetchItem(input: $input) {

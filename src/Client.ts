@@ -4,7 +4,7 @@ import uuid from 'uuid-random'
 import type { Response } from 'got'
 
 import ContentOptionsBuilder from './ContentOptionsBuilder'
-import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest } from './graphql'
+import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchContactsRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest } from './graphql'
 import { parseFilterObject } from './utils'
 import type { ContentOptions, FetchContentOptions } from './ContentOptionsBuilder'
 
@@ -15,6 +15,10 @@ type FetchCartParams = {
   anonymousUid?: string,
   orderId?: string
 }
+
+type FetchContactsParams = {
+    uid?: string | number,
+  }
 
 type CheckoutCartParams = {
   uid: string | number,
@@ -244,6 +248,13 @@ class Client {
 
     const response = await this.makeHttpRequest(fetchCartRequest, {input: params})
     return response?.fetchCart
+  }
+
+  async fetchContacts({ uid }: FetchContactsParams): Promise<any> {
+    const params = { uid: String(uid) }
+
+    const response = await this.makeHttpRequest(fetchContactsRequest, {input: params})
+    return response?.fetchContacts.contacts
   }
 
   async checkoutCart({
