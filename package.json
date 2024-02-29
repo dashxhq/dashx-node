@@ -5,7 +5,7 @@
   "description": "DashX SDK for Node",
   "main": "dist/index.js",
   "module": "dist/node.esm.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
