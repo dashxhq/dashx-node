@@ -201,7 +201,7 @@ class Client {
       return new ContentOptionsBuilder(
         (wrappedOptions) => this.makeHttpRequest(
           searchContentRequest,
-          { ...wrappedOptions, contentType }
+          { input: { ...wrappedOptions, contentType } }
         ).then((response) => response?.searchContent)
       )
     }
