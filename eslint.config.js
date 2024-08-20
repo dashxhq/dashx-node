@@ -33,15 +33,17 @@ function legacyPlugin(name, alias = name) {
 }
 
 export default [
+  pluginJs.configs.recommended,
+  ...tseslint.configs.recommended,
+  ...compat.extends('plugin:import/typescript'),
   {
     ignores: [ '**/node_modules', '**/build', '**/dist' ],
   },
-  { files: [ '**/*.{js,mjs,cjs,ts}' ] },
-  { languageOptions: { globals: globals.node } },
-  pluginJs.configs.recommended,
-  ...compat.extends('plugin:import/typescript'),
-  ...tseslint.configs.recommended,
   {
+    files: [ '**/*.{js,mjs,cjs,ts}' ],
+    languageOptions: {
+      globals: globals.node
+    },
     plugins: {
       import: legacyPlugin('eslint-plugin-import', 'import'),
       '@stylistic/ts': stylisticTs,
