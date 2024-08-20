@@ -1,10 +1,10 @@
-import crypto from 'crypto'
 import http from 'got'
 import uuid from 'uuid-random'
 import type { Response } from 'got'
 
 import ContentOptionsBuilder from './ContentOptionsBuilder'
-import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchContactsRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest } from './graphql'
+import SearchRecordsInputBuilder, { SearchRecordsOptions } from './SearchRecordsInputBuilder'
+import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchContactsRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest, searchRecordsRequest } from './graphql'
 import { parseFilterObject } from './utils'
 import type { ContentOptions, FetchContentOptions } from './ContentOptionsBuilder'
 
@@ -13,26 +13,26 @@ type IdentifyParams = Record<string, any>
 type FetchCartParams = {
   uid?: string | number,
   anonymousUid?: string,
-  orderId?: string
+  orderId?: string,
 }
 
 type FetchContactsParams = {
-    uid?: string | number,
-  }
+  uid?: string | number,
+}
 
 type CheckoutCartParams = {
   uid: string | number,
   anonymousUid?: string,
   gateway?: string,
   gatewayOptions?: Record<string, any>,
-  orderId?: string
+  orderId?: string,
 }
 
 type CapturePaymentParams = {
   uid: string | number,
   anonymousUid?: string,
   gatewayResponse: Record<string, any>,
-  orderId?: string
+  orderId?: string,
 }
 
 type PrepareAssetParams = {
@@ -40,23 +40,23 @@ type PrepareAssetParams = {
   attribute: string,
   name: string,
   size: number,
-  mimeType: string
+  mimeType: string,
 }
 
 type AssetsListParams = {
   filter?: JSON,
   limit?: number,
   order?: JSON,
-  page?: number
+  page?: number,
 }
 
 type FetchStoredPreferencesParams = {
-  uid: string | number
+  uid: string | number,
 }
 
 type SaveStoredPreferencesParams = {
-  uid: string | number
-  preferenceData: any
+  uid: string | number,
+  preferenceData: any,
 }
 
 class Client {
@@ -228,14 +228,40 @@ class Client {
     const [ contentType, content ] = urn.split('/')
     const params = { content, contentType, ...options }
 
-    const response = await this.makeHttpRequest(fetchContentRequest, {input: params})
+    const response = await this.makeHttpRequest(fetchContentRequest, { input: params })
     return response?.fetchContent
+  }
+
+  searchRecords(resource: string): SearchRecordsInputBuilder
+  searchRecords(resource: string, options: SearchRecordsOptions): Promise<any>
+  searchRecords(
+    resource: string,
+    options?: SearchRecordsOptions,
+  ): SearchRecordsInputBuilder | Promise<any> {
+    if (!options) {
+      return new SearchRecordsInputBuilder(
+        resource,
+        async (wrappedOptions) => this.makeHttpRequest(
+          searchRecordsRequest,
+          { input: { ...wrappedOptions, resource } }
+        ).then((response) => response?.searchRecords),
+      )
+    }
+
+    const filter = parseFilterObject(options.filter)
+
+    const result = this.makeHttpRequest(
+      searchRecordsRequest,
+      { input: { ...options, resource, filter } }
+    ).then((response) => response?.searchRecords)
+
+    return result
   }
 
   async fetchItem(identifier: string): Promise<any> {
     const params = { identifier }
 
-    const response = await this.makeHttpRequest(fetchItemRequest, {input: params})
+    const response = await this.makeHttpRequest(fetchItemRequest, { input: params })
     return response?.fetchItem
   }
 
@@ -246,14 +272,14 @@ class Client {
       orderId
     }
 
-    const response = await this.makeHttpRequest(fetchCartRequest, {input: params})
+    const response = await this.makeHttpRequest(fetchCartRequest, { input: params })
     return response?.fetchCart
   }
 
   async fetchContacts({ uid }: FetchContactsParams): Promise<any> {
     const params = { uid: String(uid) }
 
-    const response = await this.makeHttpRequest(fetchContactsRequest, {input: params})
+    const response = await this.makeHttpRequest(fetchContactsRequest, { input: params })
     return response?.fetchContacts.contacts
   }
 
@@ -268,7 +294,7 @@ class Client {
       orderId
     }
 
-    const response = await this.makeHttpRequest(checkoutCartRequest, {input: params})
+    const response = await this.makeHttpRequest(checkoutCartRequest, { input: params })
     return response?.checkoutCart
   }
 
@@ -282,7 +308,7 @@ class Client {
       orderId
     }
 
-    const response = await this.makeHttpRequest(capturePaymentRequest, {input: params})
+    const response = await this.makeHttpRequest(capturePaymentRequest, { input: params })
     return response?.capturePayment
   }
 
@@ -307,7 +333,7 @@ class Client {
       params = input
     }
 
-    const response = await this.makeHttpRequest(prepareAssetRequest, {input: params})
+    const response = await this.makeHttpRequest(prepareAssetRequest, { input: params })
     return response?.prepareAsset
   }
 
@@ -319,14 +345,14 @@ class Client {
   async fetchStoredPreferences({ uid }: FetchStoredPreferencesParams): Promise<any> {
     const params = { accountUid: String(uid) }
 
-    const response = await this.makeHttpRequest(fetchStoredPreferencesRequest, {input: params})
+    const response = await this.makeHttpRequest(fetchStoredPreferencesRequest, { input: params })
     return response?.preferenceData
   }
 
   async saveStoredPreferences({ uid, preferenceData }: SaveStoredPreferencesParams): Promise<any> {
     const params = { accountUid: String(uid), preferenceData }
 
-    const response = await this.makeHttpRequest(saveStoredPreferencesRequest, {input: params})
+    const response = await this.makeHttpRequest(saveStoredPreferencesRequest, { input: params })
     return response?.preferenceData
   }
 }

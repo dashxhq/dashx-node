@@ -48,6 +48,12 @@ export const fetchContentRequest = `
   }
 `
 
+export const searchRecordsRequest = `
+  query SearchRecords($input: SearchRecordsInput!) {
+    searchRecords(input: $input)
+  }
+`
+
 export const createDeliveryRequest = `
   mutation CreateDelivery($input: CreateDeliveryInput!) {
     createDelivery(input: $input) {
@@ -180,7 +186,7 @@ const asset = `
   processingStatus
   createdAt
   updatedAt
-`;
+`
 
 export const assetRequest = `
   query Asset($id: UUID!) {
