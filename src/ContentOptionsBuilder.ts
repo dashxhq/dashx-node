@@ -10,7 +10,7 @@ export type ContentOptions = {
   filter?: Record<string, any>,
   order?: Record<string, 'ASC' | 'DESC'>,
   limit?: number,
-  page?: number
+  page?: number,
 }
 
 export type FetchContentOptions = Pick<ContentOptions, 'exclude' | 'include' | 'fields' | 'language' | 'preview'>
