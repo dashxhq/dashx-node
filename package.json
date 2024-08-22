@@ -1,7 +1,7 @@
 {
   "name": "@dashx/node",
   "title": "dashx-node",
-  "version": "0.1.44",
+  "version": "0.1.45",
   "description": "DashX SDK for Node",
   "main": "dist/index.js",
   "module": "dist/node.esm.js",
@@ -9,7 +9,6 @@
   "files": [
     "dist"
   ],
-  "type": "module",
   "scripts": {
     "build": "dts build --tsconfig tsconfig.json",
     "start": "dts watch --tsconfig tsconfig.json --verbose --noClean",
