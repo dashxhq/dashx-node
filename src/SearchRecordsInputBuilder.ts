@@ -1,5 +1,3 @@
-import { parseFilterObject } from './utils'
-
 export type SearchRecordsInput = {
   resource: string,
   filter?: Record<string, any>,
@@ -34,7 +32,7 @@ class SearchRecordsInputBuilder {
   }
 
   filter(by: SearchRecordsOptions['filter']) {
-    this.options.filter = parseFilterObject(by)
+    this.options.filter = by || {}
     return this
   }
 
