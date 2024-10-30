@@ -2,11 +2,9 @@ import http from 'got'
 import uuid from 'uuid-random'
 import type { Response } from 'got'
 
-import ContentOptionsBuilder from './ContentOptionsBuilder'
 import SearchRecordsInputBuilder, { FetchRecordOptions, SearchRecordsOptions } from './SearchRecordsInputBuilder'
-import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchContactsRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest, searchRecordsRequest, fetchRecordRequest } from './graphql'
+import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, fetchContactsRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest, searchRecordsRequest, fetchRecordRequest } from './graphql'
 import { parseFilterObject } from './utils'
-import type { ContentOptions, FetchContentOptions } from './ContentOptionsBuilder'
 
 type IdentifyParams = Record<string, any>
 
@@ -160,76 +158,6 @@ class Client {
 
   track(event: string, accountUid: string | number, data: Record<string, any>): Promise<Response> {
     return this.makeHttpRequest(trackEventRequest, { input: { event, accountUid: String(accountUid), data } })
-  }
-
-  addContent(urn: string, data: Record<string, any>): Promise<Response> {
-    let content; let
-      contentType
-
-    if (urn.includes('/')) {
-      [ contentType, content ] = urn.split('/')
-    } else {
-      contentType = urn
-    }
-
-    const params = { content, contentType, data }
-
-    return this.makeHttpRequest(addContentRequest, { input: params })
-  }
-
-  editContent(urn: string, data: Record<string, any>): Promise<Response> {
-    let content; let
-      contentType
-
-    if (urn.includes('/')) {
-      [ contentType, content ] = urn.split('/')
-    } else {
-      contentType = urn
-    }
-
-    const params = { content, contentType, data }
-
-    return this.makeHttpRequest(editContentRequest, { input: params })
-  }
-
-  searchContent(contentType: string): ContentOptionsBuilder
-  searchContent(contentType: string, options: ContentOptions): Promise<any>
-  searchContent(
-    contentType: string, options?: ContentOptions
-  ): ContentOptionsBuilder | Promise<any> {
-    if (!options) {
-      return new ContentOptionsBuilder(
-        (wrappedOptions) => this.makeHttpRequest(
-          searchContentRequest,
-          { input: { ...wrappedOptions, contentType } }
-        ).then((response) => response?.searchContent)
-      )
-    }
-
-    const filter = parseFilterObject(options.filter)
-
-    const result = this.makeHttpRequest(
-      searchContentRequest,
-      { input: { ...options, contentType, filter } }
-    ).then((response) => response?.searchContent)
-
-    if (options.returnType === 'all') {
-      return result
-    }
-
-    return result.then((data) => (Array.isArray(data) ? data[0] : null))
-  }
-
-  async fetchContent(urn: string, options: FetchContentOptions): Promise<any> {
-    if (!urn.includes('/')) {
-      throw new Error('URN must be of form: {contentType}/{content}')
-    }
-
-    const [ contentType, content ] = urn.split('/')
-    const params = { content, contentType, ...options }
-
-    const response = await this.makeHttpRequest(fetchContentRequest, { input: params })
-    return response?.fetchContent
   }
 
   searchRecords(resource: string): SearchRecordsInputBuilder
