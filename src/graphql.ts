@@ -14,40 +14,6 @@ export const identifyAccountRequest = `
   }
 `
 
-export const addContentRequest = `
-  mutation AddContent($input: AddContentInput!) {
-    addContent(input: $input) {
-        id
-        identifier
-        position
-        data
-    }
-  }
-`
-
-export const editContentRequest = `
-  mutation EditContent($input: EditContentInput!) {
-    editContent(input: $input) {
-        id
-        identifier
-        position
-        data
-    }
-  }
-`
-
-export const searchContentRequest = `
-  query SearchContent($input: SearchContentInput!) {
-    searchContent(input: $input)
-  }
-`
-
-export const fetchContentRequest = `
-  query FetchContentRequest($input: FetchContentInput!) {
-    fetchContent(input: $input)
-  }
-`
-
 export const searchRecordsRequest = `
   query SearchRecords($input: SearchRecordsInput!) {
     searchRecords(input: $input)
