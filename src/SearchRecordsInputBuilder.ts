@@ -13,6 +13,8 @@ export type SearchRecordsInput = {
 
 export type SearchRecordsOptions = Omit<SearchRecordsInput, 'resource'>
 
+export type FetchRecordOptions = Pick<SearchRecordsOptions, 'exclude' | 'include' | 'fields' | 'language' | 'preview'>
+
 class SearchRecordsInputBuilder {
   private options: SearchRecordsOptions
 

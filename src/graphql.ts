@@ -54,6 +54,12 @@ export const searchRecordsRequest = `
   }
 `
 
+export const fetchRecordRequest = `
+  query FetchRecordRequest($input: FetchRecordInput!) {
+    fetchRecord(input: $input)
+  }
+`
+
 export const createDeliveryRequest = `
   mutation CreateDelivery($input: CreateDeliveryInput!) {
     createDelivery(input: $input) {

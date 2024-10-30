@@ -3,8 +3,8 @@ import uuid from 'uuid-random'
 import type { Response } from 'got'
 
 import ContentOptionsBuilder from './ContentOptionsBuilder'
-import SearchRecordsInputBuilder, { SearchRecordsOptions } from './SearchRecordsInputBuilder'
-import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchContactsRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest, searchRecordsRequest } from './graphql'
+import SearchRecordsInputBuilder, { FetchRecordOptions, SearchRecordsOptions } from './SearchRecordsInputBuilder'
+import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, addContentRequest, editContentRequest, fetchContentRequest, searchContentRequest, fetchContactsRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest, searchRecordsRequest, fetchRecordRequest } from './graphql'
 import { parseFilterObject } from './utils'
 import type { ContentOptions, FetchContentOptions } from './ContentOptionsBuilder'
 
@@ -256,6 +256,18 @@ class Client {
     ).then((response) => response?.searchRecords)
 
     return result
+  }
+
+  async fetchRecord(urn: string, options: FetchRecordOptions): Promise<any> {
+    if (!urn.includes('/')) {
+      throw new Error('URN must be of form: {resource}/{record_id}')
+    }
+
+    const [ resource, recordId ] = urn.split('/')
+    const params = { resource, recordId, ...options }
+
+    const response = await this.makeHttpRequest(fetchRecordRequest, { input: params })
+    return response?.fetchRecord
   }
 
   async fetchItem(identifier: string): Promise<any> {
