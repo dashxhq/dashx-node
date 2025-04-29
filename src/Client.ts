@@ -44,7 +44,7 @@ type PrepareAssetParams = {
 type AssetsListParams = {
   filter?: JSON,
   limit?: number,
-  order?: JSON,
+  order?: JSON[],
   page?: number,
 }
 
@@ -62,8 +62,6 @@ class Client {
 
   privateKey?: string
 
-  targetInstallation?: string
-
   targetEnvironment?: string
 
   baseUri: string
@@ -72,14 +70,24 @@ class Client {
     baseUri = process.env.DASHX_BASE_URI || 'https://api.dashx.com/graphql',
     publicKey = process.env.DASHX_PUBLIC_KEY,
     privateKey = process.env.DASHX_PRIVATE_KEY,
-    targetInstallation = process.env.DASHX_TARGET_INSTALLATION,
     targetEnvironment = process.env.DASHX_TARGET_ENVIRONMENT
   } = {}) {
+    if (!publicKey) {
+      throw new Error('Public key is required. Please set \'DASHX_PUBLIC_KEY\' environment variable or pass it in options.')
+    }
+
+    if (!privateKey) {
+      throw new Error('Private key is required. Please set \'DASHX_PRIVATE_KEY\' environment variable or pass it in options.')
+    }
+
+    if (!targetEnvironment) {
+      throw new Error('Target environment is required. Please set \'DASHX_TARGET_ENVIRONMENT\' environment variable or pass it in options.')
+    }
+
     this.baseUri = baseUri
     this.publicKey = publicKey
     this.privateKey = privateKey
     this.targetEnvironment = targetEnvironment
-    this.targetInstallation = targetInstallation
   }
 
   private async makeHttpRequest(request: string, params: any): Promise<any> {

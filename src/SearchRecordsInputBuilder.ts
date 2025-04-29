@@ -1,7 +1,7 @@
 export type SearchRecordsInput = {
   resource: string,
   filter?: Record<string, any>,
-  order?: Record<string, 'ASC' | 'DESC'>,
+  order?: Record<string, 'ASC' | 'DESC'>[],
   limit?: number,
   page?: number,
   preview?: boolean,
