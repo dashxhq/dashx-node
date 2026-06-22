@@ -1,9 +1,29 @@
 import http from 'got'
+import jwt from 'jsonwebtoken'
 import uuid from 'uuid-random'
 import type { Response } from 'got'
 
-import SearchRecordsInputBuilder, { FetchRecordOptions, SearchRecordsOptions } from './SearchRecordsInputBuilder'
-import { createDeliveryRequest, identifyAccountRequest, trackEventRequest, fetchContactsRequest, fetchItemRequest, checkoutCartRequest, capturePaymentRequest, fetchCartRequest, assetRequest, prepareAssetRequest, fetchStoredPreferencesRequest, saveStoredPreferencesRequest, assetsListRequest, searchRecordsRequest, fetchRecordRequest } from './graphql'
+import SearchRecordsInputBuilder, {
+  FetchRecordOptions,
+  SearchRecordsOptions,
+} from './SearchRecordsInputBuilder'
+import {
+  createDeliveryRequest,
+  identifyAccountRequest,
+  trackEventRequest,
+  fetchContactsRequest,
+  fetchItemRequest,
+  checkoutCartRequest,
+  capturePaymentRequest,
+  fetchCartRequest,
+  assetRequest,
+  prepareAssetRequest,
+  fetchStoredPreferencesRequest,
+  saveStoredPreferencesRequest,
+  assetsListRequest,
+  searchRecordsRequest,
+  fetchRecordRequest,
+} from './graphql'
 import { parseFilterObject } from './utils'
 
 type IdentifyParams = Record<string, any>
@@ -57,6 +77,13 @@ type SaveStoredPreferencesParams = {
   preferenceData: any,
 }
 
+type AccountIdentityKind = 'USER' | 'VISITOR'
+
+type GenerateIdentityTokenOptions = {
+  kind?: AccountIdentityKind,
+  expiresInSeconds?: number,
+}
+
 class Client {
   publicKey?: string
 
@@ -70,18 +97,24 @@ class Client {
     baseUri = process.env.DASHX_BASE_URI || 'https://api.dashx.com/graphql',
     publicKey = process.env.DASHX_PUBLIC_KEY,
     privateKey = process.env.DASHX_PRIVATE_KEY,
-    targetEnvironment = process.env.DASHX_TARGET_ENVIRONMENT
+    targetEnvironment = process.env.DASHX_TARGET_ENVIRONMENT,
   } = {}) {
     if (!publicKey) {
-      throw new Error('Public key is required. Please set \'DASHX_PUBLIC_KEY\' environment variable or pass it in options.')
+      throw new Error(
+        'Public key is required. Please set \'DASHX_PUBLIC_KEY\' environment variable or pass it in options.'
+      )
     }
 
     if (!privateKey) {
-      throw new Error('Private key is required. Please set \'DASHX_PRIVATE_KEY\' environment variable or pass it in options.')
+      throw new Error(
+        'Private key is required. Please set \'DASHX_PRIVATE_KEY\' environment variable or pass it in options.'
+      )
     }
 
     if (!targetEnvironment) {
-      throw new Error('Target environment is required. Please set \'DASHX_TARGET_ENVIRONMENT\' environment variable or pass it in options.')
+      throw new Error(
+        'Target environment is required. Please set \'DASHX_TARGET_ENVIRONMENT\' environment variable or pass it in options.'
+      )
     }
 
     this.baseUri = baseUri
@@ -94,7 +127,7 @@ class Client {
     const response: any = await http(this.baseUri, {
       body: JSON.stringify({
         query: request,
-        variables: params
+        variables: params,
       }),
       method: 'POST',
       headers: {
@@ -102,11 +135,10 @@ class Client {
         'X-Public-Key': this.publicKey,
         'X-Private-Key': this.privateKey,
         'X-Target-Environment': this.targetEnvironment,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      responseType: 'json'
-    })
-      .json()
+      responseType: 'json',
+    }).json()
 
     if (response.data) {
       return Promise.resolve(response.data)
@@ -123,7 +155,7 @@ class Client {
       templateSubkind: templateSubkind.toUpperCase(),
       templateIdentifier,
       content,
-      ...rest
+      ...rest,
     }
 
     if (content.to || to) {
@@ -138,7 +170,9 @@ class Client {
       params.content.bcc = content.bcc ? [ content.bcc ].flat() : [ bcc ].flat()
     }
 
-    const response = await this.makeHttpRequest(createDeliveryRequest, { input: params })
+    const response = await this.makeHttpRequest(createDeliveryRequest, {
+      input: params,
+    })
 
     return response?.createDelivery
   }
@@ -146,7 +180,8 @@ class Client {
   identify(uid: string | number, options?: IdentifyParams): Promise<Response>
   identify(options?: IdentifyParams): Promise<Response>
   identify(
-    uid: string | number | IdentifyParams = {}, options: IdentifyParams = {} as IdentifyParams
+    uid: string | number | IdentifyParams = {},
+    options: IdentifyParams = {} as IdentifyParams
   ): Promise<Response> {
     let params
 
@@ -157,39 +192,42 @@ class Client {
 
       params = {
         anonymousUid: uuid(),
-        ...identifyOptions
+        ...identifyOptions,
       }
     }
 
     return this.makeHttpRequest(identifyAccountRequest, { input: params })
   }
 
-  track(event: string, accountUid: string | number, data: Record<string, any>): Promise<Response> {
-    return this.makeHttpRequest(trackEventRequest, { input: { event, accountUid: String(accountUid), data } })
+  track(
+    event: string,
+    accountUid: string | number,
+    data: Record<string, any>
+  ): Promise<Response> {
+    return this.makeHttpRequest(trackEventRequest, {
+      input: { event, accountUid: String(accountUid), data },
+    })
   }
 
   searchRecords(resource: string): SearchRecordsInputBuilder
   searchRecords(resource: string, options: SearchRecordsOptions): Promise<any>
   searchRecords(
     resource: string,
-    options?: SearchRecordsOptions,
+    options?: SearchRecordsOptions
   ): SearchRecordsInputBuilder | Promise<any> {
     if (!options) {
-      return new SearchRecordsInputBuilder(
-        resource,
-        async (wrappedOptions) => this.makeHttpRequest(
-          searchRecordsRequest,
-          { input: { ...wrappedOptions, resource } }
-        ).then((response) => response?.searchRecords),
+      return new SearchRecordsInputBuilder(resource, async (wrappedOptions) =>
+        this.makeHttpRequest(searchRecordsRequest, {
+          input: { ...wrappedOptions, resource },
+        }).then((response) => response?.searchRecords)
       )
     }
 
     const filter = parseFilterObject(options.filter)
 
-    const result = this.makeHttpRequest(
-      searchRecordsRequest,
-      { input: { ...options, resource, filter } }
-    ).then((response) => response?.searchRecords)
+    const result = this.makeHttpRequest(searchRecordsRequest, {
+      input: { ...options, resource, filter },
+    }).then((response) => response?.searchRecords)
 
     return result
   }
@@ -202,67 +240,90 @@ class Client {
     const [ resource, recordId ] = urn.split('/')
     const params = { resource, recordId, ...options }
 
-    const response = await this.makeHttpRequest(fetchRecordRequest, { input: params })
+    const response = await this.makeHttpRequest(fetchRecordRequest, {
+      input: params,
+    })
     return response?.fetchRecord
   }
 
   async fetchItem(identifier: string): Promise<any> {
     const params = { identifier }
 
-    const response = await this.makeHttpRequest(fetchItemRequest, { input: params })
+    const response = await this.makeHttpRequest(fetchItemRequest, {
+      input: params,
+    })
     return response?.fetchItem
   }
 
-  async fetchCart({ uid, anonymousUid, orderId }: FetchCartParams): Promise<any> {
+  async fetchCart({
+    uid,
+    anonymousUid,
+    orderId,
+  }: FetchCartParams): Promise<any> {
     const params = {
       accountUid: String(uid),
       accountAnonymousUid: anonymousUid,
-      orderId
+      orderId,
     }
 
-    const response = await this.makeHttpRequest(fetchCartRequest, { input: params })
+    const response = await this.makeHttpRequest(fetchCartRequest, {
+      input: params,
+    })
     return response?.fetchCart
   }
 
   async fetchContacts({ uid }: FetchContactsParams): Promise<any> {
     const params = { uid: String(uid) }
 
-    const response = await this.makeHttpRequest(fetchContactsRequest, { input: params })
+    const response = await this.makeHttpRequest(fetchContactsRequest, {
+      input: params,
+    })
     return response?.fetchContacts.contacts
   }
 
   async checkoutCart({
-    uid, anonymousUid, gateway, gatewayOptions, orderId
+    uid,
+    anonymousUid,
+    gateway,
+    gatewayOptions,
+    orderId,
   }: CheckoutCartParams): Promise<any> {
     const params = {
       accountUid: String(uid),
       accountAnonymousUid: anonymousUid,
       gatewayIdentifier: gateway,
       gatewayOptions,
-      orderId
+      orderId,
     }
 
-    const response = await this.makeHttpRequest(checkoutCartRequest, { input: params })
+    const response = await this.makeHttpRequest(checkoutCartRequest, {
+      input: params,
+    })
     return response?.checkoutCart
   }
 
   async capturePayment({
-    uid, anonymousUid, gatewayResponse, orderId
+    uid,
+    anonymousUid,
+    gatewayResponse,
+    orderId,
   }: CapturePaymentParams): Promise<any> {
     const params = {
       accountUid: String(uid),
       accountAnonymousUid: anonymousUid,
       gatewayResponse,
-      orderId
+      orderId,
     }
 
-    const response = await this.makeHttpRequest(capturePaymentRequest, { input: params })
+    const response = await this.makeHttpRequest(capturePaymentRequest, {
+      input: params,
+    })
     return response?.capturePayment
   }
 
   async getAsset(id: string): Promise<any> {
     const params = {
-      id
+      id,
     }
 
     const response = await this.makeHttpRequest(assetRequest, params)
@@ -275,13 +336,15 @@ class Client {
     if (this.targetEnvironment) {
       params = {
         ...input,
-        targetEnvironment: this.targetEnvironment
+        targetEnvironment: this.targetEnvironment,
       }
     } else {
       params = input
     }
 
-    const response = await this.makeHttpRequest(prepareAssetRequest, { input: params })
+    const response = await this.makeHttpRequest(prepareAssetRequest, {
+      input: params,
+    })
     return response?.prepareAsset
   }
 
@@ -290,18 +353,47 @@ class Client {
     return response?.assetsList
   }
 
-  async fetchStoredPreferences({ uid }: FetchStoredPreferencesParams): Promise<any> {
+  async fetchStoredPreferences({
+    uid,
+  }: FetchStoredPreferencesParams): Promise<any> {
     const params = { accountUid: String(uid) }
 
-    const response = await this.makeHttpRequest(fetchStoredPreferencesRequest, { input: params })
+    const response = await this.makeHttpRequest(fetchStoredPreferencesRequest, {
+      input: params,
+    })
     return response?.preferenceData
   }
 
-  async saveStoredPreferences({ uid, preferenceData }: SaveStoredPreferencesParams): Promise<any> {
+  async saveStoredPreferences({
+    uid,
+    preferenceData,
+  }: SaveStoredPreferencesParams): Promise<any> {
     const params = { accountUid: String(uid), preferenceData }
 
-    const response = await this.makeHttpRequest(saveStoredPreferencesRequest, { input: params })
+    const response = await this.makeHttpRequest(saveStoredPreferencesRequest, {
+      input: params,
+    })
     return response?.preferenceData
+  }
+
+  // Mints an identity token (a short-lived JWT) for a visitor, used by the
+  // browser/react SDKs to authenticate that identity.
+  // `kind` defaults to `'USER'`, expiry to 7 days.
+  generateIdentityToken(
+    uid: string,
+    {
+      kind = 'USER',
+      expiresInSeconds = 60 * 60 * 24 * 7,
+    }: GenerateIdentityTokenOptions = {}
+  ): string {
+    if (!uid) {
+      throw new Error('uid is required to generate an identity token.')
+    }
+
+    return jwt.sign({ kind, uid }, this.privateKey as string, {
+      algorithm: 'HS256',
+      expiresIn: expiresInSeconds,
+    })
   }
 }
 
